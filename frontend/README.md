@@ -1,16 +1,51 @@
-# React + Vite
+# Nexora: AI Support & Operations Crew for Small Businesses
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Built for **AfterHours 1.0 (Code Beyond the Clock)**.
 
-Currently, two official plugins are available:
+## Problem
+Small business owners spend hours replying to the same customer questions and tracking stock by hand. Messages get missed, items run out, and customers leave.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Our Solution
+Nexora is a crew of AI agents that works for the business owner:
+- **Support Agent:** answers customer questions about products, stock, orders and returns.
+- **Inventory Agent:** watches stock levels and suggests restocking before items run out.
+- **Owner Approval:** sensitive actions like refunds, discounts and restocks wait for the owner's approval on a dashboard.
 
-## React Compiler
+## Features
+- Landing page
+- Customer chat page
+- Owner dashboard: overview, inventory, approval queue, conversations, agent activity log, settings
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
+- **Frontend:** React, Vite, Tailwind CSS, React Router
+- **Backend:** (in progress)
+- **Database:** (in progress)
+- **AI:** LLM API for the agents (in progress)
 
-## Expanding the ESLint configuration
+## Project Structure
+```
+nexora-support-crew/
+├── frontend/   React app
+├── backend/    API and AI agents (coming soon)
+└── README.md
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## How to Run (Frontend)
+```
+git clone https://github.com/Hafsa-28/nexora-support-crew.git
+cd nexora-support-crew/frontend
+npm install
+npm run dev
+```
+Then open http://localhost:5173
+
+## Status
+- [x] Frontend setup and landing page
+- [ ] Inventory and approval pages
+- [ ] Customer chat
+- [ ] Backend and AI agents
+
+## Team Nexora
+- Hafsa Kausar
+- Bhoomika H.K
+- D.J Gagana
