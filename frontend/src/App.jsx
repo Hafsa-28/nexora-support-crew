@@ -1,3 +1,4 @@
+import Landing from './pages/Landing'
 import { Routes, Route } from 'react-router-dom'
 import DashboardLayout from './components/DashboardLayout'
 
@@ -10,7 +11,7 @@ const Page = ({ title }) => (
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Page title="Landing page" />} />
+         <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Page title="Login" />} />
       <Route path="/chat" element={<Page title="Customer chat" />} />
       <Route path="/dashboard" element={<DashboardLayout />}>
