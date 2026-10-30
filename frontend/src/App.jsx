@@ -1,3 +1,4 @@
+import Chat from './pages/Chat'
 import Login from './pages/Login'
 import Landing from './pages/Landing'
 import { Routes, Route } from 'react-router-dom'
@@ -14,7 +15,7 @@ export default function App() {
     <Routes>
          <Route path="/" element={<Landing />} />
          <Route path="/login" element={<Login />} />
-      <Route path="/chat" element={<Page title="Customer chat" />} />
+         <Route path="/chat" element={<Chat />} />
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Page title="Overview" />} />
         <Route path="inventory" element={<Page title="Inventory" />} />
