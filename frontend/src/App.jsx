@@ -1,3 +1,4 @@
+import Overview from './pages/Overview'
 import Chat from './pages/Chat'
 import Login from './pages/Login'
 import Landing from './pages/Landing'
@@ -17,7 +18,7 @@ export default function App() {
          <Route path="/login" element={<Login />} />
          <Route path="/chat" element={<Chat />} />
       <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<Page title="Overview" />} />
+          <Route index element={<Overview />} />
         <Route path="inventory" element={<Page title="Inventory" />} />
         <Route path="approvals" element={<Page title="Approvals" />} />
         <Route path="conversations" element={<Page title="Conversations" />} />
