@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from settings import router as settings_router, seed_settings
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from slowapi import _rate_limit_exceeded_handler
@@ -53,9 +54,11 @@ def seed():
 
 seed()
 seed_approvals()
+seed_settings()
 app.include_router(auth_router)
 app.include_router(approvals_router)
 app.include_router(chat_router)
+app.include_router(settings_router)
 seed_owner()
 run_inventory_agent()
 

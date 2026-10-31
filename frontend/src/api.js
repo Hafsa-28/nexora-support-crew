@@ -21,3 +21,11 @@ export async function api(path, options = {}) {
   }
   return data
 }
+
+export const isAuthError = (err) => /token|authenticated|owner access/i.test(err.message)
+
+export const friendly = (err) =>
+  err.message === 'Failed to fetch' ? 'Cannot reach the server. Is the backend running?' : err.message
+
+// The backend sends UTC times without a "Z", so add it before converting to local time
+export const fmtTime = (s) => new Date(s + 'Z').toLocaleString()
