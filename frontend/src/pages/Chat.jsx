@@ -1,57 +1,46 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { products } from '../mockData'
-
-function getReply(text) {
-  const t = text.toLowerCase()
-
-  if (t.includes('refund') || t.includes('discount') || t.includes('complaint')) {
-    return {
-      text: "I've sent your request to the store owner for approval. You'll get a reply shortly.",
-      escalated: true,
-    }
-  }
-
-  const product = products.find((p) => t.includes(p.name.toLowerCase().split(' ').pop()))
-  if (product) {
-    if (product.stock === 0) {
-      return { text: `Sorry, the ${product.name} is out of stock right now. I can let the owner know you're interested.` }
-    }
-    const low = product.stock <= product.limit ? ` Only ${product.stock} left, so hurry!` : ''
-    return { text: `Yes! The ${product.name} is in stock for ₹${product.price}.${low}` }
-  }
-
-  if (t.includes('return') || t.includes('policy')) {
-    return { text: 'You can return any unused item within 7 days of delivery for an exchange or store credit.' }
-  }
-
-  return { text: 'I can help with product availability, prices and returns. What would you like to know?' }
-}
+import { api } from '../api'
 
 export default function Chat() {
+  const [name, setName] = useState('')
+  const [conversationId, setConversationId] = useState(null)
   const [messages, setMessages] = useState([
     { from: 'agent', text: 'Hi! I am the store assistant. How can I help you today?' },
   ])
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
+  const [error, setError] = useState('')
   const bottomRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, typing])
 
-  const send = (e) => {
+  const send = async (e) => {
     e.preventDefault()
     const text = input.trim()
     if (!text) return
+    setError('')
     setMessages((m) => [...m, { from: 'customer', text }])
     setInput('')
     setTyping(true)
-    setTimeout(() => {
-      const reply = getReply(text)
-      setMessages((m) => [...m, { from: 'agent', ...reply }])
+    try {
+      const data = await api('/chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          customer_name: name.trim() || 'Customer',
+          message: text,
+          conversation_id: conversationId,
+        }),
+      })
+      setConversationId(data.conversation_id)
+      setMessages((m) => [...m, { from: 'agent', text: data.reply, escalated: data.escalated }])
+    } catch (err) {
+      setError(err.message === 'Failed to fetch' ? 'Cannot reach the server. Is the backend running?' : 'Something went wrong. Please try again in a moment.')
+    } finally {
       setTyping(false)
-    }, 700)
+    }
   }
 
   return (
@@ -63,6 +52,16 @@ export default function Chat() {
             <p className="text-xs text-indigo-200">Powered by Nexora AI</p>
           </div>
           <Link to="/" className="text-sm text-indigo-100 hover:text-white">Home</Link>
+        </div>
+
+        <div className="px-4 py-2 border-b bg-white">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name (optional)"
+            disabled={conversationId !== null}
+            className="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 disabled:bg-slate-50"
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
@@ -85,6 +84,7 @@ export default function Chat() {
             </div>
           ))}
           {typing && <p className="text-xs text-slate-400">Assistant is typing...</p>}
+          {error && <p className="text-xs text-red-600">{error}</p>}
           <div ref={bottomRef} />
         </div>
 

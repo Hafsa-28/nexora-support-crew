@@ -5,8 +5,10 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.orm import Session
 
+from agents import inventory_agent, run_inventory_agent
 from approvals import router as approvals_router, seed_approvals
 from auth import router as auth_router, seed_owner, require_owner, limiter
+from chat import router as chat_router
 from database import Base, engine, SessionLocal, get_db
 from models import Product
 
@@ -53,7 +55,9 @@ seed()
 seed_approvals()
 app.include_router(auth_router)
 app.include_router(approvals_router)
+app.include_router(chat_router)
 seed_owner()
+run_inventory_agent()
 
 
 @app.get("/")
@@ -72,6 +76,7 @@ def add_product(product: ProductIn, db: Session = Depends(get_db)):
     db.add(item)
     db.commit()
     db.refresh(item)
+    inventory_agent(db)
     return item
 
 
@@ -84,6 +89,7 @@ def update_product(product_id: int, product: ProductIn, db: Session = Depends(ge
         setattr(item, key, value)
     db.commit()
     db.refresh(item)
+    inventory_agent(db)
     return item
 
 
