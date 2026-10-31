@@ -1,14 +1,20 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from sqlalchemy.orm import Session
 
+from approvals import router as approvals_router, seed_approvals
+from auth import router as auth_router, seed_owner, require_owner, limiter
 from database import Base, engine, SessionLocal, get_db
 from models import Product
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Nexora API")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,7 +24,6 @@ app.add_middleware(
 )
 
 
-# ---------- Schemas ----------
 class ProductIn(BaseModel):
     name: str
     price: float
@@ -31,7 +36,6 @@ class ProductOut(ProductIn):
     model_config = {"from_attributes": True}
 
 
-# ---------- Sample data (added only when the table is empty) ----------
 def seed():
     db = SessionLocal()
     if db.query(Product).count() == 0:
@@ -46,9 +50,12 @@ def seed():
 
 
 seed()
+seed_approvals()
+app.include_router(auth_router)
+app.include_router(approvals_router)
+seed_owner()
 
 
-# ---------- Routes ----------
 @app.get("/")
 def home():
     return {"message": "Nexora backend is running"}
@@ -59,7 +66,7 @@ def list_products(db: Session = Depends(get_db)):
     return db.query(Product).all()
 
 
-@app.post("/inventory", response_model=ProductOut)
+@app.post("/inventory", response_model=ProductOut, dependencies=[Depends(require_owner)])
 def add_product(product: ProductIn, db: Session = Depends(get_db)):
     item = Product(**product.model_dump())
     db.add(item)
@@ -68,7 +75,7 @@ def add_product(product: ProductIn, db: Session = Depends(get_db)):
     return item
 
 
-@app.put("/inventory/{product_id}", response_model=ProductOut)
+@app.put("/inventory/{product_id}", response_model=ProductOut, dependencies=[Depends(require_owner)])
 def update_product(product_id: int, product: ProductIn, db: Session = Depends(get_db)):
     item = db.query(Product).filter(Product.id == product_id).first()
     if not item:
@@ -80,11 +87,11 @@ def update_product(product_id: int, product: ProductIn, db: Session = Depends(ge
     return item
 
 
-@app.delete("/inventory/{product_id}")
+@app.delete("/inventory/{product_id}", dependencies=[Depends(require_owner)])
 def delete_product(product_id: int, db: Session = Depends(get_db)):
     item = db.query(Product).filter(Product.id == product_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Product not found")
     db.delete(item)
     db.commit()
-    return {"deleted":product_id};
+    return {"deleted": product_id}
